@@ -34,12 +34,20 @@ class ProductController extends GetxController {
   }
 
   // Create product
-  Future<void> addProduct(String name, double price) async {
+  Future<void> addProduct(String name, double price, String description, String? imageBase64) async {
     isLoading.value = true;
     try {
-      final product = Product(name: name, price: price);
+      final product = Product(
+        name: name, 
+        price: price,
+        description: description,
+        imageBase64: imageBase64,
+        );
       
-      await _firestore.collection('products').add(product.toMap());
+      await _firestore.collection('products').add(product.toMap()).then((docRef) async {
+      // Update dokumen dengan menambahkan ID-nya sendiri
+      await docRef.update({'id': docRef.id});
+      });
       
       // Refresh the product list
       await fetchProducts();
@@ -61,10 +69,16 @@ class ProductController extends GetxController {
   }
 
   // Update product
-  Future<void> updateProduct(String id, String name, double price) async {
+  Future<void> updateProduct(String id, String name, double price, String description, String? imageBase64) async {
     isLoading.value = true;
     try {
-      final product = Product(id: id, name: name, price: price);
+      final product = Product(
+        id: id,
+        name: name,
+        price: price,
+        description: description,
+        imageBase64: imageBase64,
+        );
       
       await _firestore.collection('products').doc(id).update(product.toMap());
       

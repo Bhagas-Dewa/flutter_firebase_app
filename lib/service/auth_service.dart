@@ -82,19 +82,20 @@ class AuthService {
 
   // Buat dokumen user di Firestore
   Future<void> _createUserDocument(User user) async {
-    // Cek apakah dokumen user sudah ada
-    DocumentSnapshot doc = await _firestore.collection('users').doc(user.uid).get();
+  DocumentSnapshot doc = await _firestore.collection('users').doc(user.uid).get();
+  
+  if (!doc.exists) {
+    UserModel newUser = UserModel(
+      id: user.uid,
+      email: user.email ?? '',
+      name: user.displayName ?? '', 
+      createdAt: DateTime.now(), // Menyimpan waktu pembuatan akun
+    );
     
-    if (!doc.exists) {
-      UserModel newUser = UserModel(
-        id: user.uid,
-        email: user.email ?? '',
-        name: user.displayName ?? '', // Tambahkan nama dari Google Sign-In
-      );
-      
-      await _firestore.collection('users').doc(user.uid).set(newUser.toMap());
-    }
+    await _firestore.collection('users').doc(user.uid).set(newUser.toMap());
   }
+}
+
 
   // Dapatkan data user dari Firestore
   Future<UserModel?> getUserData() async {

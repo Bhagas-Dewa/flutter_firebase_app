@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_firebase_app/screen/home/home.dart';
-import 'package:flutter_firebase_app/screen/profil.dart';
-import 'package:flutter_firebase_app/screen/favorite.dart';
+import 'package:flutter_firebase_app/screen/profile/profil.dart';
+import 'package:flutter_firebase_app/screen/transaction.dart';
 import 'package:flutter_firebase_app/screen/chat.dart';
 
 class CustomNavBar extends StatefulWidget {
@@ -45,7 +45,7 @@ class _CustomNavBarState extends State<CustomNavBar> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           _buildNavItem(0, defaultIcon: 'assets/home_false.svg', selectedIcon: 'assets/home_true.svg'),
-          _buildNavItem(1, defaultIcon: 'assets/star_false.svg', selectedIcon: 'assets/star_true.svg'),
+          _buildNavItem(1, defaultIcon: 'assets/shop_false.svg', selectedIcon: 'assets/shop_true.svg'),
           _buildNavItem(2, defaultIcon: 'assets/chat_false.svg', selectedIcon: 'assets/chat_true.svg'),
           _buildNavItem(3, defaultIcon: 'assets/akun_false.svg', selectedIcon: 'assets/akun_true.svg'),
         ],
@@ -75,13 +75,13 @@ class _CustomNavBarState extends State<CustomNavBar> {
                   page = HomePage();
                   break;
                 case 1:
-                  page = const FavoriteScreen();
+                  page = const TransactionScreen();
                   break;
                 case 2:
                   page = const ChatScreen();
                   break;
                 case 3:
-                  page = const ProfileScreen();
+                  page = ProfileScreen();
                   break;
                 default:
                   page = HomePage();
