@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_firebase_app/screen/profile/scanner_screen.dart';
 import 'package:flutter_firebase_app/screen/profile/video_screen.dart';
 import 'package:get/get.dart';
 import 'package:flutter_firebase_app/widgets/navbar.dart';
@@ -37,9 +38,9 @@ class ProfileScreen extends StatelessWidget {
 
               // Profile Avatar
               const CircleAvatar(
-                radius: 60,
+                radius: 40,
                 backgroundColor: Colors.blue,
-                child: Icon(Icons.person, size: 60, color: Colors.white),
+                child: Icon(Icons.person, size: 40, color: Colors.white),
               ),
 
               const SizedBox(height: 20),
@@ -114,7 +115,6 @@ class ProfileScreen extends StatelessWidget {
                   );
                 },
               ),
-
               _buildMenuItem(
                 icon: Icons.help_outline,
                 title: 'Bantuan',
@@ -122,8 +122,19 @@ class ProfileScreen extends StatelessWidget {
                  profilecontroller.launchURL('https://www.google.com');
                 },
               ),
+              _buildMenuItem(
+                icon: Icons.qr_code_2_outlined,
+                title: 'Scan QR Code',
+                onTap: () async {
+                  final scannedData = await Get.to(() => ScannerScreen());
+                  if (scannedData != null) {
+                    Get.snackbar('Scan Result', scannedData, snackPosition: SnackPosition.BOTTOM);
+                  }
+                },
+              ),
 
-              const SizedBox(height: 40),
+
+              const SizedBox(height: 20),
 
               // Logout Button
               SizedBox(

@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_firebase_app/models/user_model.dart';
+import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -74,6 +75,8 @@ class AuthService {
       
       // Sign out from Google if the user was signed in with Google
       await _googleSignIn.signOut();
+
+      await FacebookAuth.instance.logOut();
     } catch (e) {
       print('Sign Out Error: $e');
       rethrow;
@@ -89,7 +92,7 @@ class AuthService {
       id: user.uid,
       email: user.email ?? '',
       name: user.displayName ?? '', 
-      createdAt: DateTime.now(), // Menyimpan waktu pembuatan akun
+      createdAt: DateTime.now(), 
     );
     
     await _firestore.collection('users').doc(user.uid).set(newUser.toMap());
@@ -115,5 +118,33 @@ class AuthService {
     if (currentUser == null) return;
     
     await _firestore.collection('users').doc(currentUser!.uid).update(data);
+  }
+
+  // Facebook
+  Future<UserCredential?> signInWithFacebook() async {
+    try {
+      final LoginResult result = await FacebookAuth.instance.login(
+        permissions: ['email', 'public_profile'],
+      );
+
+      if (result.status == LoginStatus.success) {
+        final userData = await FacebookAuth.instance.getUserData();
+        final OAuthCredential facebookAuthCredential =
+          FacebookAuthProvider.credential(result.accessToken!.tokenString);
+
+        final UserCredential userCredential = await _auth.signInWithCredential(facebookAuthCredential);
+
+        await _createUserDocument(userCredential.user!);
+
+        return userCredential;
+      } else {
+        print('Facebook login failed: ${result.status}');
+        print('Facebook login message: ${result.message}');
+        return null;
+      }
+    } catch (e) {
+      print('Facebook Sign-In Error: $e');
+      rethrow;
+    }
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:flutter_firebase_app/controller/auth_controller.dart';
 import 'package:flutter_firebase_app/screen/home/home.dart';
@@ -108,6 +109,88 @@ class RegisterScreen extends StatelessWidget {
                 style: TextStyle(fontSize: 14, color: Color(0xff6A9DD7)),
               ),
             ),
+
+            const SizedBox(height: 15),
+            
+            // Social Sign-up Options
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Google Sign-Up Button
+                Obx(() => SizedBox(
+                  width: 250,
+                  height: 50,
+                  child: ElevatedButton(
+                    onPressed: authController.isLoading.value
+                      ? null
+                      : () async {
+                          await authController.signInWithGoogle();
+                        },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: Colors.black,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: authController.isLoading.value
+                      ? const CircularProgressIndicator()
+                      : Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            SvgPicture.asset(
+                              'assets/google_icon.svg',
+                              height: 24,
+                              width: 24,
+                            ),
+                            const SizedBox(width: 10),
+                            const Text(
+                              'Sign up with Google',
+                               style: TextStyle(
+                                fontSize: 14
+                                ),),
+                          ],
+                        ),
+                  ),
+                )),
+                
+                const SizedBox(height: 15),
+                
+                // Facebook Sign-Up Button
+                Obx(() => SizedBox(
+                  width: 250,
+                  height: 50,
+                  child: ElevatedButton(
+                    onPressed: authController.isLoading.value
+                      ? null
+                      : () async {
+                          await authController.signInWithFacebook();
+                        },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xff1877F2), // Facebook blue
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: authController.isLoading.value
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.facebook, size: 24, color: Colors.white),
+                            const SizedBox(width: 5),
+                            const Text('Sign up with Facebook', 
+                            style: TextStyle(
+                              fontSize: 14
+                              )),
+                          ],
+                        ),
+                  ),
+                )),
+              ],
+            ),
+
           ],
         ),
       ),

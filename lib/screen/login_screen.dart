@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:flutter_firebase_app/controller/auth_controller.dart';
 import 'package:flutter_firebase_app/screen/register_screen.dart';
 import 'package:flutter_firebase_app/screen/home/home.dart';
+import 'package:get/get_connect/http/src/utils/utils.dart';
 
 class LoginScreen extends StatelessWidget {
   final AuthController authController = Get.find<AuthController>();
@@ -141,12 +142,51 @@ class LoginScreen extends StatelessWidget {
                           width: 24,
                         ),
                         const SizedBox(width: 10),
-                        const Text('Sign in with Google'),
+                        const Text(
+                          'Sign in with Google',
+                          style: TextStyle(
+                            fontSize: 14,
+                          ),),
                       ],
                     ),
               ),
             )),
 
+            const SizedBox(height: 15),
+            
+            // Facebook Sign-In Button
+            Obx(() => SizedBox(
+              width: 250,
+              height: 50,
+              child: ElevatedButton(
+                onPressed: authController.isLoading.value
+                  ? null
+                  : () async {
+                      await authController.signInWithFacebook();
+                    },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xff1877F2), // Facebook blue
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: authController.isLoading.value
+                  ? const CircularProgressIndicator(color: Colors.white)
+                  : Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.facebook, size: 24, color: Colors.white),
+                        const SizedBox(width: 10),
+                        const Text('Sign in with Facebook',
+                          style: TextStyle(
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
+              ),
+            )),
 
           ],
         ),

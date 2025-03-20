@@ -1,15 +1,19 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
+
+
 
 class ProfileController extends GetxController {
   final Rx<String> locationStatus = 'Unknown'.obs;
   late VideoPlayerController videoController;
   final RxBool isVideoPlaying = false.obs;
   final RxBool isVideoInitialized = false.obs;
+  final RxString scannedResult = ''.obs;
 
   @override
   void onInit() {
@@ -22,14 +26,14 @@ class ProfileController extends GetxController {
   Future <void> launchURL(String url) async {
     final Uri uri = Uri.parse(url);
     if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
+      await launchUrl(uri, mode: LaunchMode.inAppBrowserView);
     } else {
       Get.snackbar('Error', 'Tidak dapat membuka URL',
           snackPosition: SnackPosition.BOTTOM);
     }
   }
   
-  // Method to handle location permission
+  //Method to handle location permission
   Future<bool> _handleLocationPermission() async {
     bool serviceEnabled;
     LocationPermission permission;
@@ -101,7 +105,7 @@ class ProfileController extends GetxController {
   }
 }
 
-  
+
   // Method to show your company location on the map
   Future<void> showCompanyLocation() async {
     final double companyLatitude = -7.261307; 
@@ -112,13 +116,13 @@ class ProfileController extends GetxController {
   }
 
 
-    Future<void> initializeVideo() async {
+  Future<void> initializeVideo() async {
     try {
       videoController = VideoPlayerController.asset('assets/videocompro.mp4');
 
       await videoController.initialize().then((_) {
         isVideoInitialized.value = true;
-        update(); // 🔹 Pastikan UI diperbarui setelah video siap
+        update(); 
       }).catchError((error) {
         Get.snackbar('Error', 'Failed to load video: $error');
       });
@@ -139,10 +143,24 @@ class ProfileController extends GetxController {
     }
   }
 
+
+   void setScannedResult(String result) {
+    scannedResult.value = result;
+    }
+  
+
+  bool _isValidUrl(String url) {
+    return url.startsWith('http://') || url.startsWith('https://');
+  }
+
+
+
   @override
   void onClose() {
     videoController.dispose();
+    // qrScannerController.dispose();
     super.onClose();
   }
+  
 }
 

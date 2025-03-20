@@ -8,7 +8,9 @@ import 'package:flutter_firebase_app/screen/login_screen.dart';
 class AuthController extends GetxController {
   final AuthService _authService = AuthService();
 
-  // Observables (state yang bisa berubah)
+  final Rx<User?> firebaseUser = Rx<User?>(null);
+  final Rx<UserModel?> userModel = Rx<UserModel?>(null);
+
   var isLoading = false.obs;
   var errorMessage = RxnString();
   var currentUser = Rxn<UserModel>();
@@ -16,7 +18,19 @@ class AuthController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    fetchCurrentUser(); // Ambil user saat aplikasi dimulai
+    // fetchCurrentUser(); 
+
+    firebaseUser.bindStream(_authService.authStateChanges);
+
+    ever(firebaseUser, _setUserModel);
+  }
+
+   _setUserModel(User? user) async {
+    if (user != null) {
+      userModel.value = await _authService.getUserData();
+    } else {
+      userModel.value = null;
+    }
   }
 
   // Login dengan email & password
@@ -47,7 +61,7 @@ class AuthController extends GetxController {
       await _authService.registerWithEmailAndPassword(email, password);
       await fetchCurrentUser();
 
-      Get.offAll(() => HomePage()); // Navigasi ke Home setelah register
+      Get.offAll(() => HomePage());
     } on FirebaseAuthException catch (e) {
       _handleAuthError(e);
     } catch (e) {
@@ -66,10 +80,32 @@ class AuthController extends GetxController {
       final userCredential = await _authService.signInWithGoogle();
       if (userCredential != null) {
         await fetchCurrentUser();
-        Get.offAll(() => HomePage()); // Navigasi ke Home
+        Get.offAll(() => HomePage()); 
       }
     } catch (e) {
       errorMessage.value = "Gagal login dengan Google: ${e.toString()}";
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  // Sign in with Facebook
+  Future<void> signInWithFacebook() async {
+    try {
+      isLoading.value = true;
+      errorMessage.value = null;
+      
+      final userCredential = await _authService.signInWithFacebook();
+      
+      if (userCredential != null) {
+        await fetchCurrentUser();
+        Get.offAll(() => HomePage());
+      }
+    } on FirebaseAuthException catch (e) {
+      _handleAuthError(e);
+    } catch (e) {
+      errorMessage.value = 'Gagal masuk dengan Facebook. Silahkan coba lagi.';
+      print(e);
     } finally {
       isLoading.value = false;
     }
@@ -122,4 +158,5 @@ class AuthController extends GetxController {
         errorMessage.value = "Error: ${e.message}";
     }
   }
+
 }

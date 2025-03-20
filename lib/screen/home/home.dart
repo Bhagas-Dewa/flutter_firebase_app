@@ -6,10 +6,37 @@ import 'package:flutter_firebase_app/screen/home/editproduct_screen.dart';
 import 'package:flutter_firebase_app/screen/home/detailproduct_screen.dart';
 import 'package:flutter_firebase_app/controller/product_controller.dart';
 import 'package:get/get.dart';
+import 'package:flutter_firebase_app/widgets/pricefilter_bottomsheet.dart';
 
-class HomePage extends StatelessWidget {
-  final ProductController productController = Get.put(ProductController());
+class HomePage extends StatefulWidget {
   HomePage({Key? key}) : super(key: key);
+  
+  @override
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  final ProductController productController = Get.put(ProductController());
+  final TextEditingController searchController = TextEditingController();
+
+  void _showPriceFilterBottomSheet() {
+  showPriceFilterBottomSheet(context, productController);
+  }
+  
+  @override
+  void initState() {
+    super.initState();
+    // Tambahkan listener untuk memicu rebuild UI ketika teks berubah
+    searchController.addListener(() {
+      setState(() {}); // Ini akan menyebabkan widget di-rebuild saat teks berubah
+    });
+  }
+
+  @override
+  void dispose() {
+    searchController.dispose();
+    super.dispose();
+  }
   
   @override
   Widget build(BuildContext context) {
@@ -26,129 +53,181 @@ class HomePage extends StatelessWidget {
         elevation: 0,
       ),
       body: Padding(
-        padding: const EdgeInsets.only(right: 16, left: 16, top: 2, bottom: 2),
-        child: Obx(() {
-          if (productController.isLoading.value) {
-            return const Center(
-              child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(Color(0xff3E6B99)),
-              ),
-            );
-          }
-          
-          if (productController.products.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+        padding: const EdgeInsets.only(right: 16, left: 16, top: 12, bottom: 2),
+        child: Column(
+          children: [
+           Container(
+              width: double.infinity,
+              child: Row(
                 children: [
-                  Icon(
-                    Icons.inbox_outlined,
-                    size: 100,
-                    color: Colors.grey[400],
+                  Expanded(
+                    child: TextField(
+                      controller: searchController,
+                      onChanged: (value) => productController.searchProducts(value.toLowerCase().trim()),
+                      decoration: InputDecoration(
+                        hintText: "Cari Produk...",
+                        prefixIcon: Icon(Icons.search),
+                        suffixIcon: searchController.text.isNotEmpty
+                          ? IconButton(
+                              icon: Icon(Icons.clear),
+                              onPressed: () {
+                                searchController.clear();
+                                productController.searchProducts('');
+                              },
+                            )
+                          : null,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        filled: true,
+                        fillColor: Colors.white,
+                      ),
+                    ),
                   ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Tidak ada produk',
-                    style: TextStyle(
-                      color: Colors.grey[600],
-                      fontSize: 18,
+                  SizedBox(width: 10),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Color(0xff3E6B99),
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                    child: IconButton(
+                      icon: Icon(Icons.filter_list, color: Colors.white),
+                      onPressed: _showPriceFilterBottomSheet,
                     ),
                   ),
                 ],
               ),
-            );
-          }
-          
-          return ListView.builder(
-            itemCount: productController.products.length,
-            itemBuilder: (context, index) {
-              final product = productController.products[index];
-              return GestureDetector(
-                onTap: () {
-                  Get.to(() => ProductDetailScreen(product: product));
-                },
-                child: Card(
-                  color: Color.fromARGB(255, 255, 255, 255),
-                  elevation: 1,
-                  margin: const EdgeInsets.symmetric(vertical: 4),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
+            ), 
+            SizedBox(height: 10),
+            Expanded(
+              child: Obx(() {
+                if (productController.isLoading.value) {
+                  return const Center(
+                    child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(Color(0xff3E6B99)),
+                    ),
+                  );
+                }
+
+                final displayProducts = productController.filteredProducts;
+                
+                if (displayProducts.isEmpty) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        // Image container
-                        Container(
-                          width: 80,
-                          height: 80,
-                          decoration: BoxDecoration(
-                            color: Colors.grey[200],
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: _buildProductImage(product.imageBase64),
+                        Icon(
+                          Icons.inbox_outlined,
+                          size: 100,
+                          color: Colors.grey[400],
                         ),
-                        
-                        SizedBox(width: 16),
-                        
-                        // Product details - only name and price in list view
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
+                        const SizedBox(height: 16),
+                        Text(
+                          'Tidak ada produk',
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 18,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+                
+                return ListView.builder(
+                  itemCount: displayProducts.length,
+                  itemBuilder: (context, index) {
+                    final product = displayProducts[index];
+                    return GestureDetector(
+                      onTap: () {
+                        Get.to(() => ProductDetailScreen(product: product));
+                      },
+                      child: Card(
+                        color: Color.fromARGB(255, 255, 255, 255),
+                        elevation: 1,
+                        margin: const EdgeInsets.symmetric(vertical: 4),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              Text(
-                                product.name,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 20,
+                              // Image container
+                              Container(
+                                width: 80,
+                                height: 80,
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[200],
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: _buildProductImage(product.imageBase64),
+                              ),
+                              
+                              SizedBox(width: 16),
+                              
+                              // Product details - only name and price in list view
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      product.name,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 20,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      'Rp ${product.price.toStringAsFixed(2)}',
+                                      style: TextStyle(
+                                        color: Color(0xff7BB661),
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                              const SizedBox(height: 4),
-                              Text(
-                                'Rp ${product.price.toStringAsFixed(2)}',
-                                style: TextStyle(
-                                  color: Color(0xff7BB661),
-                                  fontWeight: FontWeight.w500,
-                                ),
+                              
+                              // Action buttons
+                              Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  IconButton(
+                                    icon: Icon(
+                                      Icons.edit,
+                                      color: Color(0xff3E6B99),
+                                    ),
+                                    onPressed: () {
+                                      Get.to(() => EditProductScreen(product: product));
+                                    },
+                                  ),
+                                  IconButton(
+                                    icon: Icon(
+                                      Icons.delete,
+                                      color: Colors.red[600],
+                                    ),
+                                    onPressed: () {
+                                      _showDeleteDialog(product);
+                                    },
+                                  ),
+                                ],
                               ),
                             ],
                           ),
                         ),
-                        
-                        // Action buttons
-                        Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              icon: Icon(
-                                Icons.edit,
-                                color: Color(0xff3E6B99),
-                              ),
-                              onPressed: () {
-                                Get.to(() => EditProductScreen(product: product));
-                              },
-                            ),
-                            IconButton(
-                              icon: Icon(
-                                Icons.delete,
-                                color: Colors.red[600],
-                              ),
-                              onPressed: () {
-                                _showDeleteDialog(product);
-                              },
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              );
-            },
-          );
-        }),
+                      ),
+                    );
+                  },
+                );
+              }),
+            ),
+
+          ],
+        ),
       ),
       bottomNavigationBar: const CustomNavBar(initialIndex: 0),
       floatingActionButton: FloatingActionButton(
