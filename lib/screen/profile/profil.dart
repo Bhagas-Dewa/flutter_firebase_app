@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_firebase_app/screen/profile/scanner_screen.dart';
 import 'package:flutter_firebase_app/screen/profile/video_screen.dart';
+import 'package:flutter_firebase_app/screen/profile/webview_screen.dart';
 import 'package:get/get.dart';
 import 'package:flutter_firebase_app/widgets/navbar.dart';
 import 'package:flutter_firebase_app/controller/auth_controller.dart';
@@ -132,6 +133,16 @@ class ProfileScreen extends StatelessWidget {
                   }
                 },
               ),
+               _buildMenuItem(
+                  icon: Icons.web_outlined,
+                  title: 'Web View',
+                  onTap: () {
+                    Get.to(() => WebviewScreen(
+                      url: 'https://flutter.dev/',
+                      title: 'Website',
+                    ));
+                  },
+                ),
 
 
               const SizedBox(height: 20),

@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
 import 'package:flutter_firebase_app/models/product_model.dart';
+import 'package:share_plus/share_plus.dart';
 
 class ProductController extends GetxController {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -200,7 +201,23 @@ class ProductController extends GetxController {
     }
   }
 
-  
+  Future<void> shareProduct(Product product) async {
+  try {
+    // First create the share text
+    String shareText = 'Check out this product!\n\n'
+        'Name: ${product.name}\n'
+        'Price: Rp ${product.price.toStringAsFixed(2)}\n'
+        'Description: ${product.description}';
+
+      await Share.share(shareText);
+  } catch (e) {
+    Get.snackbar(
+      'Error',
+      'Failed to share product: $e',
+      snackPosition: SnackPosition.BOTTOM,
+    );
+  }
+}
   
 
   }

@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_firebase_app/screen/profile/webview_screen.dart';
 import 'package:get/get.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -15,11 +16,17 @@ class ProfileController extends GetxController {
   final RxBool isVideoInitialized = false.obs;
   final RxString scannedResult = ''.obs;
 
+
+
   @override
   void onInit() {
     super.onInit();
     initializeVideo(); 
   }
+
+  void openWebView(String url, {String title = 'Web View'}) {
+  Get.to(() => WebviewScreen(url: url, title: title));
+}
 
   
   // Fungsi untuk membuka URL di browser
@@ -75,10 +82,8 @@ class ProfileController extends GetxController {
     return true;
   }
 
-  // Get current location and open in Google Maps
   Future<void> getCurrentLocation() async {
      try {
-    // First request permission
     LocationPermission permission = await Geolocator.requestPermission();
     
     if (permission == LocationPermission.denied) {
@@ -93,10 +98,8 @@ class ProfileController extends GetxController {
       return;
     }
     
-    // Get current position
     Position position = await Geolocator.getCurrentPosition();
     
-    // Show location in Google Maps
     final url = 'https://www.google.com/maps/search/?api=1&query=${position.latitude},${position.longitude}';
     launchURL(url);
     
@@ -105,8 +108,6 @@ class ProfileController extends GetxController {
   }
 }
 
-
-  // Method to show your company location on the map
   Future<void> showCompanyLocation() async {
     final double companyLatitude = -7.261307; 
     final double companyLongitude = 112.739267;
@@ -147,18 +148,11 @@ class ProfileController extends GetxController {
    void setScannedResult(String result) {
     scannedResult.value = result;
     }
-  
-
-  bool _isValidUrl(String url) {
-    return url.startsWith('http://') || url.startsWith('https://');
-  }
-
 
 
   @override
   void onClose() {
     videoController.dispose();
-    // qrScannerController.dispose();
     super.onClose();
   }
   

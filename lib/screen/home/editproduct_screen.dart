@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_firebase_app/controller/product_controller.dart';
+import 'package:flutter_firebase_app/screen/home/home.dart';
 import 'package:get/get.dart';
 import 'package:flutter_firebase_app/models/product_model.dart';
 import 'package:image_picker/image_picker.dart';
@@ -23,6 +24,7 @@ class EditProductScreen extends StatelessWidget {
     nameController.text = product.name;
     priceController.text = product.price.toString();
     existingImageBase64.value = product.imageBase64;
+    descriptionController.text = product.description;
   }
   
   // Method to pick image from gallery
@@ -36,13 +38,12 @@ class EditProductScreen extends StatelessWidget {
     
     if (image != null) {
       selectedImage.value = File(image.path);
-      existingImageBase64.value = null; // Clear existing image when new one is selected
+      existingImageBase64.value = null; 
     }
   }
   
   // Convert image file to base64
   Future<String?> _getBase64Image() async {
-    // If a new image is selected, encode and return it
     if (selectedImage.value != null) {
       try {
         final bytes = await selectedImage.value!.readAsBytes();
@@ -53,7 +54,6 @@ class EditProductScreen extends StatelessWidget {
       }
     }
     
-    // If using existing image, return its base64 string
     return existingImageBase64.value;
   }
   
@@ -77,7 +77,6 @@ class EditProductScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Image section
                 Obx(() {
                   // Case 1: New image selected
                   if (selectedImage.value != null) {
@@ -198,6 +197,19 @@ class EditProductScreen extends StatelessWidget {
                     return null;
                   },
                 ),
+
+                SizedBox(height: 16),
+                
+                TextFormField(
+                  controller: descriptionController,
+                  decoration: InputDecoration(
+                    labelText: 'Deskripsi Produk',
+                    border: OutlineInputBorder(),
+                    alignLabelWithHint: true,
+                  ),
+                  maxLines: 5,
+                  minLines: 3,
+                ),
                 
                 SizedBox(height: 24),
                 
@@ -217,7 +229,7 @@ class EditProductScreen extends StatelessWidget {
                             descriptionController.text,
                             imageBase64,
                           ).then((_) {
-                            Navigator.pop(context);
+                            Get.to(HomePage());
                           });
                         }
                       },

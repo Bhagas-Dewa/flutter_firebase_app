@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_firebase_app/models/product_model.dart';
 import 'package:flutter_firebase_app/widgets/navbar.dart';
 import 'package:flutter_firebase_app/screen/home/createproduct_screen.dart';
 import 'package:flutter_firebase_app/screen/home/editproduct_screen.dart';
@@ -7,6 +8,7 @@ import 'package:flutter_firebase_app/screen/home/detailproduct_screen.dart';
 import 'package:flutter_firebase_app/controller/product_controller.dart';
 import 'package:get/get.dart';
 import 'package:flutter_firebase_app/widgets/pricefilter_bottomsheet.dart';
+import 'package:share_plus/share_plus.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({Key? key}) : super(key: key);
@@ -26,9 +28,8 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    // Tambahkan listener untuk memicu rebuild UI ketika teks berubah
     searchController.addListener(() {
-      setState(() {}); // Ini akan menyebabkan widget di-rebuild saat teks berubah
+      setState(() {});
     });
   }
 
@@ -150,14 +151,14 @@ class _HomePageState extends State<HomePage> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Padding(
-                          padding: const EdgeInsets.all(12.0),
+                          padding: const EdgeInsets.only(top: 4, bottom: 4, left: 8, right: 8),
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               // Image container
                               Container(
-                                width: 80,
-                                height: 80,
+                                width: 90,
+                                height: 120,
                                 decoration: BoxDecoration(
                                   color: Colors.grey[200],
                                   borderRadius: BorderRadius.circular(8),
@@ -177,13 +178,14 @@ class _HomePageState extends State<HomePage> {
                                       product.name,
                                       style: const TextStyle(
                                         fontWeight: FontWeight.bold,
-                                        fontSize: 20,
+                                        fontSize: 24,
                                       ),
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
                                       'Rp ${product.price.toStringAsFixed(2)}',
                                       style: TextStyle(
+                                        fontSize: 16,
                                         color: Color(0xff7BB661),
                                         fontWeight: FontWeight.w500,
                                       ),
@@ -200,6 +202,7 @@ class _HomePageState extends State<HomePage> {
                                     icon: Icon(
                                       Icons.edit,
                                       color: Color(0xff3E6B99),
+                                      size: 20,
                                     ),
                                     onPressed: () {
                                       Get.to(() => EditProductScreen(product: product));
@@ -209,11 +212,23 @@ class _HomePageState extends State<HomePage> {
                                     icon: Icon(
                                       Icons.delete,
                                       color: Colors.red[600],
+                                      size: 20,
                                     ),
                                     onPressed: () {
-                                      _showDeleteDialog(product);
+                                      productController.deleteProduct(product.id!);
                                     },
                                   ),
+                                  IconButton(
+                                    icon: Icon(
+                                      Icons.share,
+                                      color: Colors.black,
+                                      size: 20
+                                      ),
+                                    onPressed: () {
+                                      productController.shareProduct(product);
+                                    },
+                                  ),
+                                  
                                 ],
                               ),
                             ],
@@ -285,24 +300,4 @@ class _HomePageState extends State<HomePage> {
     }
   }
   
-  void _showDeleteDialog(product) {
-    Get.defaultDialog(
-      title: 'Hapus Produk',
-      titleStyle: const TextStyle(
-        fontWeight: FontWeight.bold,
-        fontSize: 20,
-      ),
-      middleText: 'Anda yakin menghapus produk ${product.name}?',
-      textCancel: 'Batal',
-      textConfirm: 'Hapus',
-      cancelTextColor: Colors.black,
-      confirmTextColor: Colors.white,
-      buttonColor: Colors.red,
-      onConfirm: () {
-        productController.deleteProduct(product.id!);
-        Get.back();
-      },
-      barrierDismissible: false,
-    );
-  }
 }
